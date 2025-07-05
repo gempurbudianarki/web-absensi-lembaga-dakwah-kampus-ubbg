@@ -3,117 +3,109 @@
 namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
-use Illuminate\Http\Request;
 use App\Models\User;
 use App\Models\Divisi;
+use App\Http\Requests\Admin\StoreUserRequest;   // <-- Panggil StoreUserRequest
+use App\Http\Requests\Admin\UpdateUserRequest;  // <-- Panggil UpdateUserRequest
+use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
-use Illuminate\Validation\Rule;
+use Illuminate\View\View;
+use Illuminate\Http\RedirectResponse;
 
 class UserController extends Controller
 {
     /**
-     * Display a listing of the resource.
+     * Menampilkan daftar semua pengguna.
      */
-    public function index()
+    public function index(): View
     {
-        $users = User::with('divisi')->orderBy('name', 'asc')->get();
+        $users = User::with('divisi')->latest()->paginate(10); // Gunakan paginate untuk data yang banyak
         return view('admin.users.index', compact('users'));
     }
 
     /**
-     * Show the form for creating a new resource.
+     * Menampilkan form untuk membuat pengguna baru.
      */
-    public function create()
+    public function create(): View
     {
-        $divisis = Divisi::orderBy('nama_divisi', 'asc')->get();
+        $divisis = Divisi::all();
         return view('admin.users.create', compact('divisis'));
     }
 
     /**
-     * Store a newly created resource in storage.
+     * Menyimpan pengguna baru ke dalam database.
      */
-    public function store(Request $request)
+    public function store(StoreUserRequest $request): RedirectResponse
     {
-        $request->validate([
-            'name' => 'required|string|max:255',
-            'nim' => 'required|string|max:255|unique:users,nim',
-            'email' => 'required|string|email|max:255|unique:users,email',
-            'password' => 'required|string|min:8',
-            'role' => 'required|in:admin,ketua,pengurus,anggota',
-            'divisi_id' => 'nullable|exists:divisis,id',
-        ]);
+        // Validasi sudah otomatis dijalankan oleh StoreUserRequest.
+        // Jika gagal, akan otomatis redirect kembali dengan pesan error.
+        $validatedData = $request->validated();
 
         User::create([
-            'name' => $request->name,
-            'nim' => $request->nim,
-            'email' => $request->email,
-            'password' => Hash::make($request->password),
-            'role' => $request->role,
-            'divisi_id' => $request->divisi_id,
+            'name' => $validatedData['name'],
+            'nim' => $validatedData['nim'],
+            'email' => $validatedData['email'],
+            'password' => Hash::make($validatedData['password']),
+            'role' => $validatedData['role'],
+            'divisi_id' => $validatedData['divisi_id'],
         ]);
 
-        return redirect()->route('admin.users.index')->with('success', 'Pengguna baru berhasil ditambahkan!');
+        return redirect()->route('admin.users.index')->with('success', 'Pengguna baru berhasil ditambahkan.');
     }
 
     /**
-     * Display the specified resource.
+     * Menampilkan detail spesifik dari seorang pengguna.
+     * (Method ini tidak digunakan jika Anda tidak memiliki halaman detail, tapi ini adalah standar resource controller)
      */
-    public function show(User $user)
+    public function show(User $user): View
     {
-        //
+        // Biasanya untuk menampilkan halaman detail user, jika diperlukan.
+        return view('admin.users.show', compact('user'));
     }
 
+
     /**
-     * Show the form for editing the specified resource.
+     * Menampilkan form untuk mengedit pengguna.
      */
-    public function edit(User $user)
+    public function edit(User $user): View
     {
-        $divisis = Divisi::orderBy('nama_divisi', 'asc')->get();
+        $divisis = Divisi::all();
         return view('admin.users.edit', compact('user', 'divisis'));
     }
 
     /**
-     * Update the specified resource in storage.
+     * Memperbarui data pengguna di dalam database.
      */
-    public function update(Request $request, User $user)
+    public function update(UpdateUserRequest $request, User $user): RedirectResponse
     {
-        $request->validate([
-            'name' => 'required|string|max:255',
-            'nim' => ['required', 'string', 'max:255', Rule::unique('users')->ignore($user->id)],
-            'email' => ['required', 'string', 'email', 'max:255', Rule::unique('users')->ignore($user->id)],
-            'password' => 'nullable|string|min:8',
-            'role' => 'required|in:admin,ketua,pengurus,anggota',
-            'divisi_id' => 'nullable|exists:divisis,id',
-        ]);
+        // Validasi otomatis dijalankan oleh UpdateUserRequest.
+        $validatedData = $request->validated();
 
-        $updateData = [
-            'name' => $request->name,
-            'nim' => $request->nim,
-            'email' => $request->email,
-            'role' => $request->role,
-            'divisi_id' => $request->divisi_id,
-        ];
-
-        if ($request->filled('password')) {
-            $updateData['password'] = Hash::make($request->password);
+        // Cek apakah password diisi atau tidak
+        if (!empty($validatedData['password'])) {
+            $validatedData['password'] = Hash::make($validatedData['password']);
+        } else {
+            // Jika password tidak diisi, hapus dari array agar tidak menimpa password lama
+            unset($validatedData['password']);
         }
 
-        $user->update($updateData);
+        $user->update($validatedData);
 
-        return redirect()->route('admin.users.index')->with('success', 'Data pengguna berhasil diperbarui!');
+        return redirect()->route('admin.users.index')->with('success', 'Data pengguna berhasil diperbarui.');
     }
 
     /**
-     * Remove the specified resource from storage.
+     * Menghapus pengguna dari database.
      */
-    public function destroy(User $user)
+    public function destroy(User $user): RedirectResponse
     {
-        // [MODIFIKASI KITA] Logika untuk menghapus pengguna
-        
-        // Hapus data pengguna dari database
+        // Tambahkan logika untuk memastikan admin tidak bisa menghapus dirinya sendiri
+        if (auth()->id() === $user->id) {
+            return back()->with('error', 'Anda tidak dapat menghapus akun Anda sendiri.');
+        }
+
         $user->delete();
 
-        // Arahkan kembali ke halaman daftar pengguna dengan pesan sukses
-        return redirect()->route('admin.users.index')->with('success', 'Pengguna berhasil dihapus!');
+        return redirect()->route('admin.users.index')->with('success', 'Pengguna berhasil dihapus.');
     }
 }

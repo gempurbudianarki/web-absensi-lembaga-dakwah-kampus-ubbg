@@ -1,114 +1,181 @@
 <!DOCTYPE html>
-<html lang="{{ str_replace('_', '-', app()->getLocale()) }}">
+<html lang="en">
+
 <head>
     <meta charset="utf-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1">
-    <meta name="csrf-token" content="{{ csrf_token() }}">
-    <title>{{ config('app.name', 'Laravel') }} - Admin Panel</title>
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <title>LDK Absensi - Admin Dashboard</title>
 
-    @vite(['resources/sass/app.scss', 'resources/js/app.js'])
-    <link rel="dns-prefetch" href="//fonts.bunny.net">
-    <link href="https://fonts.bunny.net/css?family=Nunito" rel="stylesheet">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
+    <!-- Font Awesome -->
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css" rel="stylesheet" type="text/css">
+    
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css?family=Nunito:200,200i,300,300i,400,400i,600,600i,700,700i,800,800i,900,900i" rel="stylesheet">
 
-    {{-- [MODIFIKASI KITA #1] Menambahkan CSS untuk Cropper.js --}}
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.5.13/cropper.min.css" />
+    <!-- SB Admin 2 CSS -->
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/startbootstrap-sb-admin-2/4.1.4/css/sb-admin-2.min.css" rel="stylesheet">
 
-    <style>
-        body { overflow-x: hidden; }
-        #sidebar-wrapper { min-height: 100vh; margin-left: -15rem; transition: margin .25s ease-out; }
-        #sidebar-wrapper .sidebar-heading { padding: 0.875rem 1.25rem; font-size: 1.2rem; }
-        #sidebar-wrapper .list-group { width: 15rem; }
-        #page-content-wrapper { min-width: 100vw; }
-        #wrapper.toggled #sidebar-wrapper { margin-left: 0; }
-        @media (min-width: 768px) {
-            #sidebar-wrapper { margin-left: 0; }
-            #page-content-wrapper { min-width: 0; width: 100%; }
-            #wrapper.toggled #sidebar-wrapper { margin-left: -15rem; }
-        }
-        /* Style untuk preview image di cropper */
-        .img-container { width: 100%; height: 400px; margin-top: 1rem; }
-        .img-container img { max-width: 100%; }
-    </style>
+    <!-- INI ADALAH KUNCI PERBAIKANNYA -->
+    <!-- Ini akan memuat CSS kustom dari halaman lain (seperti create.blade.php) -->
+    @stack('styles')
+
 </head>
-<body>
-    <div class="d-flex" id="wrapper">
-        <!-- Sidebar -->
-        <div class="bg-white border-right" id="sidebar-wrapper">
-            <div class="sidebar-heading"><strong>LDK Absensi</strong></div>
-            <div class="list-group list-group-flush">
-                <a href="{{ route('admin.dashboard') }}" class="list-group-item list-group-item-action bg-light"><i class="fas fa-tachometer-alt me-2"></i>Dashboard</a>
-                <a href="{{ route('admin.users.index') }}" class="list-group-item list-group-item-action bg-light"><i class="fas fa-users me-2"></i>Manajemen Pengguna</a>
-                <a href="{{ route('admin.kegiatans.index') }}" class="list-group-item list-group-item-action bg-light"><i class="fas fa-calendar-alt me-2"></i>Manajemen Kegiatan</a>
-                <a href="{{ route('admin.laporans.index') }}" class="list-group-item list-group-item-action bg-light"><i class="fas fa-chart-bar me-2"></i>Laporan</a>
-            </div>
-        </div>
-        <!-- /#sidebar-wrapper -->
 
-        <!-- Page Content -->
-        <div id="page-content-wrapper">
-            <nav class="navbar navbar-expand-lg navbar-light bg-white border-bottom">
-                <div class="container-fluid">
-                    <button class="btn btn-primary" id="menu-toggle"><i class="fas fa-bars"></i></button>
-                    <div class="ms-auto">
-                        <ul class="navbar-nav">
-                            <li class="nav-item dropdown">
-                                <a class="nav-link dropdown-toggle" href="#" id="navbarDropdown" role="button" data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-                                    <i class="fas fa-user me-2"></i>{{ Auth::user()->name }}
+<body id="page-top">
+
+    <!-- Page Wrapper -->
+    <div id="wrapper">
+
+        <!-- Sidebar -->
+        <ul class="navbar-nav bg-gradient-primary sidebar sidebar-dark accordion" id="accordionSidebar">
+
+            <!-- Sidebar - Brand -->
+            <a class="sidebar-brand d-flex align-items-center justify-content-center" href="{{ route('admin.dashboard') }}">
+                <div class="sidebar-brand-icon rotate-n-15">
+                    <i class="fas fa-mosque"></i>
+                </div>
+                <div class="sidebar-brand-text mx-3">LDK Absensi</div>
+            </a>
+
+            <!-- Divider -->
+            <hr class="sidebar-divider my-0">
+
+            <!-- Nav Item - Dashboard -->
+            <li class="nav-item {{ request()->routeIs('admin.dashboard') ? 'active' : '' }}">
+                <a class="nav-link" href="{{ route('admin.dashboard') }}">
+                    <i class="fas fa-fw fa-tachometer-alt"></i>
+                    <span>Dashboard</span></a>
+            </li>
+
+            <!-- Divider -->
+            <hr class="sidebar-divider">
+
+            <!-- Heading -->
+            <div class="sidebar-heading">
+                Manajemen
+            </div>
+
+            <!-- Nav Item - Users -->
+            <li class="nav-item {{ request()->routeIs('admin.users.*') ? 'active' : '' }}">
+                <a class="nav-link" href="{{ route('admin.users.index') }}">
+                    <i class="fas fa-fw fa-users"></i>
+                    <span>Pengguna</span></a>
+            </li>
+
+            <!-- Nav Item - Kegiatan -->
+            <li class="nav-item {{ request()->routeIs('admin.kegiatans.*') ? 'active' : '' }}">
+                <a class="nav-link" href="{{ route('admin.kegiatans.index') }}">
+                    <i class="fas fa-fw fa-calendar-alt"></i>
+                    <span>Kegiatan</span></a>
+            </li>
+
+            <!-- Nav Item - Laporan -->
+            <li class="nav-item {{ request()->routeIs('admin.laporans.*') ? 'active' : '' }}">
+                <a class="nav-link" href="{{ route('admin.laporans.index') }}">
+                    <i class="fas fa-fw fa-chart-area"></i>
+                    <span>Laporan</span></a>
+            </li>
+
+            <!-- Divider -->
+            <hr class="sidebar-divider d-none d-md-block">
+
+            <!-- Sidebar Toggler (Sidebar) -->
+            <div class="text-center d-none d-md-inline">
+                <button class="rounded-circle border-0" id="sidebarToggle"></button>
+            </div>
+
+        </ul>
+        <!-- End of Sidebar -->
+
+        <!-- Content Wrapper -->
+        <div id="content-wrapper" class="d-flex flex-column">
+
+            <!-- Main Content -->
+            <div id="content">
+
+                <!-- Topbar -->
+                <nav class="navbar navbar-expand navbar-light bg-white topbar mb-4 static-top shadow">
+                    <button id="sidebarToggleTop" class="btn btn-link d-md-none rounded-circle mr-3">
+                        <i class="fa fa-bars"></i>
+                    </button>
+                    <ul class="navbar-nav ml-auto">
+                        <div class="topbar-divider d-none d-sm-block"></div>
+                        <li class="nav-item dropdown no-arrow">
+                            <a class="nav-link dropdown-toggle" href="#" id="userDropdown" role="button"
+                                data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                                <span class="mr-2 d-none d-lg-inline text-gray-600 small">{{ Auth::user()->name }}</span>
+                                <img class="img-profile rounded-circle" src="https://ui-avatars.com/api/?name={{ urlencode(Auth::user()->name) }}&background=4e73df&color=fff">
+                            </a>
+                            <div class="dropdown-menu dropdown-menu-right shadow animated--grow-in"
+                                aria-labelledby="userDropdown">
+                                <a class="dropdown-item" href="#" data-toggle="modal" data-target="#logoutModal">
+                                    <i class="fas fa-sign-out-alt fa-sm fa-fw mr-2 text-gray-400"></i>
+                                    Logout
                                 </a>
-                                <div class="dropdown-menu dropdown-menu-end" aria-labelledby="navbarDropdown">
-                                    <a class="dropdown-item" href="{{ route('logout') }}" onclick="event.preventDefault(); document.getElementById('logout-form').submit();">Logout</a>
-                                    <form id="logout-form" action="{{ route('logout') }}" method="POST" class="d-none">@csrf</form>
-                                </div>
-                            </li>
-                        </ul>
+                            </div>
+                        </li>
+                    </ul>
+                </nav>
+                <!-- End of Topbar -->
+
+                <!-- Begin Page Content -->
+                @yield('content')
+
+            </div>
+            <!-- End of Main Content -->
+
+            <!-- Footer -->
+            <footer class="sticky-footer bg-white">
+                <div class="container my-auto">
+                    <div class="copyright text-center my-auto">
+                        <span>Copyright &copy; LDK UBBG {{ date('Y') }}</span>
                     </div>
                 </div>
-            </nav>
-
-            <main class="container-fluid p-4">
-                @yield('content')
-            </main>
+            </footer>
+            <!-- End of Footer -->
         </div>
-        <!-- /#page-content-wrapper -->
+        <!-- End of Content Wrapper -->
     </div>
-    <!-- /#wrapper -->
+    <!-- End of Page Wrapper -->
 
-    {{-- [MODIFIKASI KITA #2] Menambahkan struktur Modal untuk Cropper --}}
-    <div class="modal fade" id="cropperModal" tabindex="-1" aria-labelledby="cropperModalLabel" aria-hidden="true">
-        <div class="modal-dialog modal-lg">
+    <!-- Scroll to Top Button-->
+    <a class="scroll-to-top rounded" href="#page-top">
+        <i class="fas fa-angle-up"></i>
+    </a>
+
+    <!-- Logout Modal-->
+    <div class="modal fade" id="logoutModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel"
+        aria-hidden="true">
+        <div class="modal-dialog" role="document">
             <div class="modal-content">
                 <div class="modal-header">
-                    <h5 class="modal-title" id="cropperModalLabel">Potong & Sesuaikan Gambar</h5>
-                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                    <h5 class="modal-title" id="exampleModalLabel">Siap untuk Keluar?</h5>
+                    <button class="close" type="button" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">×</span>
+                    </button>
                 </div>
-                <div class="modal-body">
-                    <div class="img-container">
-                        <img id="imageToCrop" src="">
-                    </div>
-                </div>
+                <div class="modal-body">Pilih "Logout" di bawah jika Anda siap untuk mengakhiri sesi Anda saat ini.</div>
                 <div class="modal-footer">
-                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Batal</button>
-                    <button type="button" class="btn btn-primary" id="crop-button">Potong & Simpan</button>
+                    <button class="btn btn-secondary" type="button" data-dismiss="modal">Batal</button>
+                    <a class="btn btn-primary" href="{{ route('logout') }}" onclick="event.preventDefault(); document.getElementById('logout-form').submit();">Logout</a>
+                    <form id="logout-form" action="{{ route('logout') }}" method="POST" class="d-none">
+                        @csrf
+                    </form>
                 </div>
             </div>
         </div>
     </div>
 
-    <!-- JS untuk Bootstrap (sudah ada dari @vite) -->
-    <!-- JS untuk Cropper.js -->
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.5.13/cropper.min.js"></script>
+    <!-- SEMUA SCRIPT DARI CDN -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/4.6.1/js/bootstrap.bundle.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery-easing/1.4.1/jquery.easing.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/startbootstrap-sb-admin-2/4.1.4/js/sb-admin-2.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
-    <!-- Custom JS untuk Toggle Sidebar dan Cropper -->
+    <!-- Ini akan memuat script kustom dari halaman lain -->
     @stack('scripts')
-    <script>
-        document.addEventListener("DOMContentLoaded", function(event) {
-            const menuToggle = document.body.querySelector('#menu-toggle');
-            menuToggle.addEventListener('click', event => {
-                event.preventDefault();
-                document.body.querySelector('#wrapper').classList.toggle('toggled');
-            });
-        });
-    </script>
+
 </body>
 </html>

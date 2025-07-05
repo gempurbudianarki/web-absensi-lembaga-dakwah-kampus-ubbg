@@ -1,56 +1,58 @@
-{{-- [MODIFIKASI KITA] Menggunakan layout admin yang baru dengan sidebar --}}
 @extends('layouts.admin')
 
 @section('content')
-    <h1 class="mt-4">Detail Laporan Kehadiran</h1>
-    <p>Kegiatan: <strong>{{ $kegiatan->nama_kegiatan }}</strong></p>
+<div class="container-fluid">
+    <div class="d-sm-flex align-items-center justify-content-between mb-4">
+        <div>
+            <h1 class="h3 mb-0 text-gray-800">Detail Laporan: {{ $kegiatan->nama_kegiatan }}</h1>
+            <p class="mb-0 text-muted">{{ $kegiatan->tanggal->format('l, d F Y') }}</p>
+        </div>
+        <div>
+            <a href="#" class="btn btn-primary">
+                <i class="fas fa-download fa-sm text-white-50"></i> Ekspor ke Excel
+            </a>
+        </div>
+    </div>
 
-    <div class="card mb-4">
-        <div class="card-header">
-            <i class="fas fa-table me-1"></i>
-            Daftar Kehadiran
+    <div class="card shadow mb-4">
+        <div class="card-header py-3">
+            <h6 class="m-0 font-weight-bold text-primary">Daftar Kehadiran Peserta</h6>
         </div>
         <div class="card-body">
-            <p>
-                <strong>Tanggal:</strong> {{ \Carbon\Carbon::parse($kegiatan->tanggal_kegiatan)->format('d F Y') }} <br>
-                <strong>Total Peserta Hadir:</strong> {{ $kegiatan->absensi->count() }} orang
-            </p>
-            <hr>
             <div class="table-responsive">
-                <table class="table table-striped table-bordered">
+                <table class="table table-bordered" id="dataTable" width="100%" cellspacing="0">
                     <thead>
                         <tr>
-                            <th>#</th>
+                            <th>No</th>
                             <th>Nama Peserta</th>
                             <th>NIM</th>
                             <th>Divisi</th>
-                            <th>Status</th>
                             <th>Waktu Absen</th>
+                            <th class="text-center">Status</th>
                         </tr>
                     </thead>
                     <tbody>
-                        @forelse ($kegiatan->absensi as $absen)
+                        @forelse ($kegiatan->absensis as $absensi)
                             <tr>
-                                <th>{{ $loop->iteration }}</th>
-                                <td>{{ $absen->user->name ?? 'Data User Dihapus' }}</td>
-                                <td>{{ $absen->user->nim ?? '-' }}</td>
-                                <td>{{ $absen->user->divisi->nama_divisi ?? '-' }}</td>
-                                <td>
-                                    <span class="badge bg-primary">{{ $absen->status }}</span>
-                                </td>
-                                <td>
-                                    {{ \Carbon\Carbon::parse($absen->created_at)->format('H:i:s') }} WIB
+                                <td>{{ $loop->iteration }}</td>
+                                <td>{{ $absensi->user->name ?? 'Pengguna tidak ditemukan' }}</td>
+                                <td>{{ $absensi->user->nim ?? '-' }}</td>
+                                <td>{{ $absensi->user->divisi->nama_divisi ?? 'Umum' }}</td>
+                                <td>{{ $absensi->created_at->format('H:i:s') }}</td>
+                                <td class="text-center">
+                                    {{-- Di masa depan, kita bisa menambahkan status lain seperti Izin atau Sakit --}}
+                                    <span class="badge badge-success">Hadir</span>
                                 </td>
                             </tr>
                         @empty
                             <tr>
-                                <td colspan="6" class="text-center">Belum ada data kehadiran untuk kegiatan ini.</td>
+                                <td colspan="6" class="text-center">Belum ada peserta yang melakukan absensi.</td>
                             </tr>
                         @endforelse
                     </tbody>
                 </table>
             </div>
-            <a href="{{ route('admin.laporans.index') }}" class="btn btn-secondary mt-3">Kembali ke Daftar Laporan</a>
         </div>
     </div>
+</div>
 @endsection

@@ -1,44 +1,55 @@
-{{-- [MODIFIKASI KITA] Menggunakan layout admin yang baru dengan sidebar --}}
 @extends('layouts.admin')
 
 @section('content')
-    <h1 class="mt-4">Laporan Kehadiran</h1>
-    <p>Pilih kegiatan di bawah ini untuk melihat detail laporan kehadiran.</p>
+<div class="container-fluid">
+    <div class="d-sm-flex align-items-center justify-content-between mb-4">
+        <h1 class="h3 mb-0 text-gray-800">Laporan Absensi</h1>
+    </div>
 
-    <div class="card mb-4">
-        <div class="card-header">
-            <i class="fas fa-chart-bar me-1"></i>
-            Pilih Kegiatan
+    <div class="card shadow mb-4">
+        <div class="card-header py-3">
+            <h6 class="m-0 font-weight-bold text-primary">Daftar Kegiatan</h6>
         </div>
         <div class="card-body">
             <div class="table-responsive">
-                <table class="table table-striped table-bordered">
+                <table class="table table-bordered" id="dataTable" width="100%" cellspacing="0">
                     <thead>
                         <tr>
-                            <th>#</th>
+                            <th>No</th>
                             <th>Nama Kegiatan</th>
                             <th>Tanggal</th>
-                            <th>Aksi</th>
+                            <th class="text-center">Jumlah Peserta Hadir</th>
+                            <th class="text-center">Aksi</th>
                         </tr>
                     </thead>
                     <tbody>
                         @forelse ($kegiatans as $kegiatan)
                             <tr>
-                                <th>{{ $loop->iteration }}</th>
+                                <td>{{ $loop->iteration + $kegiatans->firstItem() - 1 }}</td>
                                 <td>{{ $kegiatan->nama_kegiatan }}</td>
-                                <td>{{ \Carbon\Carbon::parse($kegiatan->tanggal_kegiatan)->format('d F Y') }}</td>
-                                <td>
-                                    <a href="{{ route('admin.laporans.show', $kegiatan->id) }}" class="btn btn-sm btn-info">Lihat Laporan</a>
+                                <td>{{ $kegiatan->tanggal->format('d F Y') }}</td>
+                                <td class="text-center">
+                                    <span class="badge badge-success">{{ $kegiatan->absensis_count }} Peserta</span>
+                                </td>
+                                <td class="text-center">
+                                    <a href="{{ route('admin.laporans.show', $kegiatan->id) }}" class="btn btn-info btn-sm">
+                                        <i class="fas fa-eye"></i> Lihat Detail
+                                    </a>
                                 </td>
                             </tr>
                         @empty
                             <tr>
-                                <td colspan="4" class="text-center">Belum ada data kegiatan untuk ditampilkan.</td>
+                                <td colspan="5" class="text-center">Belum ada kegiatan.</td>
                             </tr>
                         @endforelse
                     </tbody>
                 </table>
             </div>
+            <!-- Pagination Links -->
+            <div class="d-flex justify-content-center">
+                {{ $kegiatans->links() }}
+            </div>
         </div>
     </div>
+</div>
 @endsection

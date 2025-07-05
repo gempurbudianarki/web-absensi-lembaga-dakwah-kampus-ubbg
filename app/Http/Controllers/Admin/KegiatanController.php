@@ -4,117 +4,72 @@ namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
 use App\Models\Kegiatan;
-use Illuminate\Http\Request;
-use Illuminate\Support\Str;
+use App\Http\Requests\Admin\StoreKegiatanRequest;
+use App\Http\Requests\Admin\UpdateKegiatanRequest;
+use Illuminate\Http\RedirectResponse;
 use Illuminate\Support\Facades\Storage;
+use Illuminate\View\View;
+use Illuminate\Support\Str;
 
 class KegiatanController extends Controller
 {
-    /**
-     * Menampilkan daftar semua kegiatan.
-     */
-    public function index()
+    public function index(): View
     {
-        $kegiatans = Kegiatan::orderBy('tanggal_kegiatan', 'desc')->get();
+        $kegiatans = Kegiatan::latest()->paginate(10);
         return view('admin.kegiatans.index', compact('kegiatans'));
     }
 
-    /**
-     * Menampilkan form untuk membuat kegiatan baru.
-     */
-    public function create()
+    public function create(): View
     {
         return view('admin.kegiatans.create');
     }
 
-    /**
-     * Menyimpan kegiatan baru ke database.
-     */
-    public function store(Request $request)
+    public function store(StoreKegiatanRequest $request): RedirectResponse
     {
-        $request->validate([
-            'nama_kegiatan' => 'required|string|max:255',
-            'deskripsi' => 'nullable|string',
-            'poster' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048',
-            'tanggal_kegiatan' => 'required|date',
-            'waktu_mulai_absen' => 'required|date',
-            'waktu_selesai_absen' => 'required|date|after:waktu_mulai_absen',
-        ]);
-
-        $data = $request->all();
-
-        if ($request->hasFile('poster')) {
-            $path = $request->file('poster')->store('posters', 'public');
-            $data['poster'] = $path;
+        $validatedData = $request->validated();
+        if ($request->filled('poster_base64')) {
+            $validatedData['poster'] = $this->saveBase64Image($request->input('poster_base64'));
         }
-
-        if (empty($data['kode_absensi'])) {
-            $data['kode_absensi'] = strtoupper(Str::slug(substr($data['nama_kegiatan'], 0, 6), '')) . '-' . strtoupper(Str::random(6));
-        }
-
-        Kegiatan::create($data);
-
-        return redirect()->route('admin.kegiatans.index')->with('success', 'Kegiatan baru berhasil ditambahkan!');
+        Kegiatan::create($validatedData);
+        return redirect()->route('admin.kegiatans.index')->with('success', 'Kegiatan baru berhasil dibuat!');
     }
 
-    /**
-     * Menampilkan form untuk mengedit kegiatan.
-     */
-    public function edit(Kegiatan $kegiatan)
+    public function edit(Kegiatan $kegiatan): View
     {
         return view('admin.kegiatans.edit', compact('kegiatan'));
     }
 
-    /**
-     * Memperbarui data kegiatan di database.
-     */
-    public function update(Request $request, Kegiatan $kegiatan)
+    public function update(UpdateKegiatanRequest $request, Kegiatan $kegiatan): RedirectResponse
     {
-        $request->validate([
-            'nama_kegiatan' => 'required|string|max:255',
-            'deskripsi' => 'nullable|string',
-            'poster' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048',
-            'tanggal_kegiatan' => 'required|date',
-            'waktu_mulai_absen' => 'required|date',
-            'waktu_selesai_absen' => 'required|date|after:waktu_mulai_absen',
-        ]);
+        $validatedData = $request->validated();
 
-        $data = $request->all();
-
-        if ($request->hasFile('poster')) {
+        if ($request->filled('poster_base64')) {
             if ($kegiatan->poster) {
                 Storage::disk('public')->delete($kegiatan->poster);
             }
-            $path = $request->file('poster')->store('posters', 'public');
-            $data['poster'] = $path;
+            $validatedData['poster'] = $this->saveBase64Image($request->input('poster_base64'));
         }
 
-        if (empty($data['kode_absensi'])) {
-            $data['kode_absensi'] = strtoupper(Str::slug(substr($data['nama_kegiatan'], 0, 6), '')) . '-' . strtoupper(Str::random(6));
-        }
-
-        $kegiatan->update($data);
-
-        return redirect()->route('admin.kegiatans.index')->with('success', 'Data kegiatan berhasil diperbarui!');
+        $kegiatan->update($validatedData);
+        return redirect()->route('admin.kegiatans.index')->with('success', 'Kegiatan berhasil diperbarui!');
     }
 
-    /**
-     * Menghapus kegiatan dari database.
-     */
-    public function destroy(Kegiatan $kegiatan)
+    public function destroy(Kegiatan $kegiatan): RedirectResponse
     {
-        // [MODIFIKASI KITA] Logika untuk menghapus kegiatan dan posternya
-        
-        // 1. Cek apakah kegiatan ini punya poster
         if ($kegiatan->poster) {
-            // Jika ada, hapus file posternya dari storage
             Storage::disk('public')->delete($kegiatan->poster);
         }
-
-        // 2. Hapus data kegiatan dari database
         $kegiatan->delete();
+        return redirect()->route('admin.kegiatans.index')->with('success', 'Kegiatan berhasil dihapus.');
+    }
 
-        // 3. Arahkan kembali ke halaman daftar kegiatan dengan pesan sukses
-        return redirect()->route('admin.kegiatans.index')->with('success', 'Kegiatan berhasil dihapus!');
+    private function saveBase64Image(string $base64Data): string
+    {
+        @list($type, $imageData) = explode(';', $base64Data);
+        @list(, $imageData)      = explode(',', $imageData);
+        $imageData = base64_decode($imageData);
+        $imageName = 'posters/' . Str::random(40) . '.jpg';
+        Storage::disk('public')->put($imageName, $imageData);
+        return $imageName;
     }
 }

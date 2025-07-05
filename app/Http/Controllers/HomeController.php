@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 
 class HomeController extends Controller
 {
@@ -23,6 +24,17 @@ class HomeController extends Controller
      */
     public function index()
     {
-        return view('home');
+        // Ambil pengguna yang sedang login
+        $user = Auth::user();
+
+        // Cek peran pengguna
+        if ($user->role == 'admin') {
+            // Jika admin, arahkan ke dashboard admin
+            return redirect()->route('admin.dashboard');
+        }
+
+        // Untuk SEMUA peran lainnya (ketua, pengurus, anggota, dll)
+        // Arahkan ke dashboard portal pengguna yang baru
+        return redirect()->route('user.dashboard');
     }
 }

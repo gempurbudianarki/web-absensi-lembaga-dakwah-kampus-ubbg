@@ -15,14 +15,17 @@ class Kegiatan extends Model
      *
      * @var array<int, string>
      */
-    // [MODIFIKASI KITA] Menambahkan 'poster' ke dalam daftar izin
     protected $fillable = [
         'nama_kegiatan',
+        'tanggal',
+        'waktu_mulai',
+        'waktu_selesai',
+        'absensi_mulai',      // <-- Tambahkan ini
+        'absensi_selesai',    // <-- Tambahkan ini
+        'status',             // <-- Tambahkan ini
+        'lokasi',
         'deskripsi',
-        'poster', // <-- INI YANG TERLEWAT
-        'tanggal_kegiatan',
-        'waktu_mulai_absen',
-        'waktu_selesai_absen',
+        'poster',
         'kode_absensi',
     ];
 
@@ -32,16 +35,17 @@ class Kegiatan extends Model
      * @var array<string, string>
      */
     protected $casts = [
-        'tanggal_kegiatan' => 'date',
-        'waktu_mulai_absen' => 'datetime',
-        'waktu_selesai_absen' => 'datetime',
+        'tanggal' => 'date',
+        'waktu_mulai' => 'datetime:H:i',
+        'waktu_selesai' => 'datetime:H:i',
+        'absensi_mulai' => 'datetime', // <-- Tambahkan ini
+        'absensi_selesai' => 'datetime', // <-- Tambahkan ini
     ];
 
-
     /**
-     * Mendefinisikan relasi bahwa satu Kegiatan bisa memiliki banyak data Absensi.
+     * Mendefinisikan relasi "satu-ke-banyak" dengan model Absensi.
      */
-    public function absensi(): HasMany
+    public function absensis(): HasMany
     {
         return $this->hasMany(Absensi::class);
     }

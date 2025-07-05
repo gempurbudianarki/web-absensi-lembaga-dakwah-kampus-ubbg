@@ -5,35 +5,32 @@ namespace App\Http\Controllers\Admin;
 use App\Http\Controllers\Controller;
 use App\Models\Kegiatan;
 use Illuminate\Http\Request;
+use Illuminate\View\View;
 
 class LaporanController extends Controller
 {
     /**
-     * Menampilkan halaman utama laporan, berisi daftar kegiatan.
-     *
-     * @return \Illuminate\View\View
+     * Menampilkan halaman daftar laporan untuk setiap kegiatan.
      */
-    public function index()
+    public function index(): View
     {
-        $kegiatans = Kegiatan::orderBy('tanggal_kegiatan', 'desc')->get();
+        // Mengambil kegiatan dan menghitung jumlah absensi terkait
+        // untuk ditampilkan sebagai ringkasan.
+        $kegiatans = Kegiatan::withCount('absensis')->latest()->paginate(10);
+
         return view('admin.laporans.index', compact('kegiatans'));
     }
 
     /**
-     * Menampilkan detail laporan untuk kegiatan tertentu.
-     *
-     * @param  \App\Models\Kegiatan  $kegiatan
-     * @return \Illuminate\View\View
+     * Menampilkan detail laporan absensi untuk satu kegiatan spesifik.
+     * Menggunakan Route Model Binding.
      */
-    public function show(Kegiatan $kegiatan)
+    public function show(Kegiatan $kegiatan): View
     {
-        // [MODIFIKASI KITA]
-        // Eager load relasi untuk efisiensi query.
-        // Kita ambil kegiatan, beserta data absensinya,
-        // dan untuk setiap absensi, kita ambil juga data user dan divisi user tersebut.
-        $kegiatan->load('absensi.user.divisi');
+        // Menggunakan eager loading untuk mengambil data absensi
+        // beserta data pengguna yang terkait untuk menghindari N+1 problem.
+        $kegiatan->load('absensis.user');
 
-        // Kirim data kegiatan yang sudah lengkap dengan data absensi ke view
         return view('admin.laporans.show', compact('kegiatan'));
     }
 }

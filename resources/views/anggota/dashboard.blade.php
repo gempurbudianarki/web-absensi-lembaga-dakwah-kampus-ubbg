@@ -1,159 +1,145 @@
 @extends('layouts.app')
 
-{{-- [MODIFIKASI KITA] Menambahkan Font, Ikon, dan CSS Kustom untuk tampilan premium --}}
-@push('styles')
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
-
-<style>
-    /* Mengganti font utama dan warna latar belakang untuk kesan bersih dan modern */
-    body {
-        background-color: #f8f9fa; /* Warna abu-abu yang sangat terang */
-        font-family: 'Inter', sans-serif;
-    }
-
-    /* Banner sambutan dengan gradient biru yang elegan dan profesional */
-    .welcome-banner {
-        background: linear-gradient(135deg, #0d6efd, #0558d6);
-        color: white;
-        padding: 3rem 2rem;
-        border-radius: 1rem;
-        margin-bottom: 2.5rem;
-    }
-    .welcome-banner h1 {
-        font-weight: 700;
-        font-size: 2.5rem;
-    }
-    .welcome-banner p {
-        font-size: 1.15rem;
-        opacity: 0.9;
-        max-width: 600px;
-        margin-left: auto;
-        margin-right: auto;
-    }
-
-    /* Judul seksi yang lebih tegas dan modern */
-    .section-title {
-        font-weight: 700;
-        font-size: 1.75rem;
-        margin-bottom: 1.5rem;
-        color: #212529;
-    }
-
-    /* Desain kartu kegiatan yang mewah dengan efek hover */
-    .kegiatan-card {
-        border: none;
-        border-radius: 0.75rem; /* Sedikit lebih tegas */
-        box-shadow: 0 4px 6px rgba(0,0,0,0.04);
-        transition: all 0.3s ease;
-        overflow: hidden;
-    }
-    .kegiatan-card:hover {
-        transform: translateY(-5px);
-        box-shadow: 0 12px 20px rgba(0,0,0,0.08);
-    }
-
-    /* Kontainer gambar dengan rasio aspek 16:9 */
-    .kegiatan-card .card-img-container {
-        position: relative;
-        width: 100%;
-        padding-top: 56.25%; /* 16:9 Aspect Ratio */
-        background-color: #e9ecef;
-    }
-    .kegiatan-card .card-img-top {
-        position: absolute;
-        top: 0;
-        left: 0;
-        width: 100%;
-        height: 100%;
-        object-fit: cover;
-    }
-    
-    .kegiatan-card .card-body {
-        background-color: #ffffff;
-        padding: 1.5rem;
-    }
-    .kegiatan-card .card-title {
-        font-weight: 600;
-        font-size: 1.1rem;
-        color: #343a40;
-    }
-    .kegiatan-card .card-text .icon {
-        color: #0d6efd;
-    }
-
-    /* Tombol absensi dengan gaya yang lebih premium */
-    .btn-absen {
-        font-weight: 600;
-        padding: 0.75rem 1.5rem;
-        border-radius: 0.5rem;
-        transition: all 0.3s ease;
-    }
-    .btn-absen:hover {
-        transform: scale(1.02);
-    }
-</style>
-@endpush
-
-
 @section('content')
-<div class="container py-5">
+<div class="container py-4">
+    {{-- Header Sambutan --}}
+    <div class="p-5 mb-4 bg-light rounded-3 shadow-sm">
+        <div class="container-fluid py-3">
+            <h1 class="display-5 fw-bold">Selamat Datang, {{ Auth::user()->name }}!</h1>
+            <p class="col-md-8 fs-4">Jelajahi kegiatan LDK, lakukan absensi, dan tingkatkan keaktifanmu.</p>
+        </div>
+    </div>
 
-    {{-- Notifikasi --}}
+    {{-- Notifikasi Sukses atau Error --}}
     @if (session('success'))
         <div class="alert alert-success alert-dismissible fade show" role="alert">
             {{ session('success') }}
-            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+            <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+                <span aria-hidden="true">&times;</span>
+            </button>
         </div>
     @endif
     @if (session('error'))
         <div class="alert alert-danger alert-dismissible fade show" role="alert">
             {{ session('error') }}
-            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+            <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+                <span aria-hidden="true">&times;</span>
+            </button>
         </div>
     @endif
 
-    {{-- Welcome Banner --}}
-    <div class="welcome-banner text-center">
-        <h1>Assalamu'alaikum, <strong>{{ Auth::user()->name }}</strong>!</h1>
-        <p>Selamat datang di Portal Absensi LDK. Mari tingkatkan semangat dalam setiap kegiatan!</p>
+    {{-- Daftar Kegiatan Tersedia --}}
+    <div class="mb-5">
+        <h2 class="pb-2 border-bottom">Kegiatan Tersedia</h2>
+        <div class="row">
+            @forelse ($kegiatansTersedia as $kegiatan)
+                <div class="col-md-6 col-lg-4 mb-4">
+                    <div class="card h-100 shadow-sm event-card">
+                        {{-- MENAMPILKAN POSTER KEGIATAN --}}
+                        <img src="{{ $kegiatan->poster ? asset('storage/' . $kegiatan->poster) : 'https://placehold.co/600x400/6c757d/FFFFFF?text=Poster' }}" class="card-img-top" alt="Poster {{ $kegiatan->nama_kegiatan }}">
+                        <div class="card-body d-flex flex-column">
+                            <h5 class="card-title">{{ $kegiatan->nama_kegiatan }}</h5>
+                            <p class="card-text text-muted flex-grow-1">
+                                <i class="fas fa-calendar-alt fa-fw mr-2"></i>{{ $kegiatan->tanggal->format('l, d F Y') }}<br>
+                                <i class="fas fa-clock fa-fw mr-2"></i>{{ $kegiatan->waktu_mulai->format('H:i') }} - {{ $kegiatan->waktu_selesai->format('H:i') }} WIB<br>
+                                <i class="fas fa-map-marker-alt fa-fw mr-2"></i>{{ $kegiatan->lokasi }}
+                            </p>
+                            <button class="btn btn-success mt-auto" 
+                                    data-toggle="modal" 
+                                    data-target="#absensiModal"
+                                    data-kegiatan-id="{{ $kegiatan->id }}"
+                                    data-kegiatan-nama="{{ $kegiatan->nama_kegiatan }}">
+                                <i class="fas fa-check-circle mr-2"></i>Lakukan Absensi
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            @empty
+                <div class="col">
+                    <div class="alert alert-info">Saat ini belum ada kegiatan yang tersedia.</div>
+                </div>
+            @endforelse
+        </div>
     </div>
 
-    {{-- Daftar Kegiatan --}}
-    <h2 class="section-title">Jadwal Kegiatan</h2>
-    <div class="row row-cols-1 row-cols-md-2 row-cols-lg-3 g-4">
-        @forelse ($kegiatans as $kegiatan)
-            <div class="col">
-                <div class="kegiatan-card h-100 d-flex flex-column">
-                    <div class="card-img-container">
-                        @if ($kegiatan->poster)
-                            <img src="{{ asset('storage/' . $kegiatan->poster) }}" class="card-img-top" alt="Poster {{ $kegiatan->nama_kegiatan }}">
-                        @else
-                            <img src="https://placehold.co/600x400/343a40/ffffff?text={{ urlencode($kegiatan->nama_kegiatan) }}" class="card-img-top" alt="Placeholder">
-                        @endif
-                    </div>
-                    <div class="card-body d-flex flex-column">
-                        <h5 class="card-title mb-2">{{ $kegiatan->nama_kegiatan }}</h5>
-                        <p class="card-text text-muted mb-4">
-                            <i class="fas fa-calendar-alt icon me-2"></i>{{ \Carbon\Carbon::parse($kegiatan->tanggal_kegiatan)->format('l, d F Y') }}
-                        </p>
-                        <a href="{{ route('anggota.absensi.show', $kegiatan->id) }}" class="btn btn-primary btn-absen mt-auto">
-                            <i class="fas fa-sign-in-alt me-2"></i>Lakukan Absensi
-                        </a>
+    {{-- Riwayat Absensi --}}
+    <div class="mt-4">
+        <h2 class="pb-2 border-bottom">Riwayat Absensi Saya</h2>
+        <div class="table-responsive">
+            <table class="table table-striped table-hover">
+                <thead class="thead-light">
+                    <tr>
+                        <th>No</th>
+                        <th>Nama Kegiatan</th>
+                        <th>Tanggal Kegiatan</th>
+                        <th>Waktu Absen</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @forelse ($riwayatAbsensi as $absensi)
+                        <tr>
+                            <td>{{ $loop->iteration + $riwayatAbsensi->firstItem() - 1 }}</td>
+                            <td>{{ $absensi->kegiatan->nama_kegiatan ?? 'Kegiatan tidak ditemukan' }}</td>
+                            <td>{{ $absensi->kegiatan->tanggal->format('d F Y') ?? '-' }}</td>
+                            <td>{{ $absensi->created_at->format('d F Y, H:i:s') }}</td>
+                        </tr>
+                    @empty
+                        <tr>
+                            <td colspan="4" class="text-center">Anda belum pernah melakukan absensi.</td>
+                        </tr>
+                    @endforelse
+                </tbody>
+            </table>
+            <div class="d-flex justify-content-center">
+                {{ $riwayatAbsensi->links() }}
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Modal Absensi (Tidak ada perubahan di sini, hanya memastikannya ada) -->
+<div class="modal fade" id="absensiModal" tabindex="-1" role="dialog" aria-labelledby="absensiModalLabel" aria-hidden="true">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="absensiModalLabel">Form Absensi</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <form action="{{ route('anggota.absensi.store') }}" method="POST">
+                @csrf
+                <div class="modal-body">
+                    <p>Anda akan melakukan absensi untuk kegiatan: <strong id="namaKegiatanModal"></strong></p>
+                    <input type="hidden" name="kegiatan_id" id="kegiatan_id">
+                    <div class="form-group">
+                        <label for="kode_absensi">Masukkan Kode Absensi</label>
+                        <input type="text" class="form-control" id="kode_absensi" name="kode_absensi" placeholder="Ketik kode di sini..." required>
                     </div>
                 </div>
-            </div>
-        @empty
-            <div class="col-12">
-                <div class="text-center py-5">
-                    <i class="fas fa-info-circle fa-4x text-muted mb-3"></i>
-                    <h4>Belum Ada Kegiatan</h4>
-                    <p class="text-muted">Saat ini belum ada kegiatan yang dijadwalkan. Silakan cek kembali nanti.</p>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Batal</button>
+                    <button type="submit" class="btn btn-primary">Kirim Absensi</button>
                 </div>
-            </div>
-        @endforelse
+            </form>
+        </div>
     </div>
 </div>
 @endsection
+
+@push('scripts')
+{{-- Script ini tetap sama, memastikan modal berfungsi --}}
+<script>
+$(document).ready(function() {
+    $('#absensiModal').on('show.bs.modal', function (event) {
+        var button = $(event.relatedTarget);
+        var kegiatanId = button.data('kegiatan-id');
+        var kegiatanNama = button.data('kegiatan-nama');
+        var modal = $(this);
+        modal.find('.modal-title').text('Form Absensi: ' + kegiatanNama);
+        modal.find('#namaKegiatanModal').text(kegiatanNama);
+        modal.find('#kegiatan_id').val(kegiatanId);
+    });
+});
+</script>
+@endpush

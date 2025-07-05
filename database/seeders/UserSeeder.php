@@ -2,10 +2,12 @@
 
 namespace Database\Seeders;
 
+use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use Illuminate\Database\Seeder;
 use App\Models\User;
 use App\Models\Divisi;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Schema;
 
 class UserSeeder extends Seeder
 {
@@ -14,50 +16,36 @@ class UserSeeder extends Seeder
      */
     public function run(): void
     {
-        // Ambil ID dari setiap divisi
-        $divisiBph = Divisi::where('nama_divisi', 'Badan Pengurus Harian (BPH)')->first();
-        $divisiSyiar = Divisi::where('nama_divisi', 'Syiar')->first();
-        $divisiKaderisasi = Divisi::where('nama_divisi', 'Kaderisasi')->first();
-        $divisiMedia = Divisi::where('nama_divisi', 'Media dan Informasi')->first();
+        // Ambil ID divisi berdasarkan nama baru
+        $divisiSyiar = Divisi::where('nama_divisi', 'Syiar dan Dakwah')->first();
+        $divisiBpsdm = Divisi::where('nama_divisi', 'BPSDM')->first();
 
-        // Buat Admin (role: admin)
+        if (!$divisiSyiar || !$divisiBpsdm) {
+            $this->command->error('Divisi tidak ditemukan. Pastikan DivisiSeeder sudah benar.');
+            return;
+        }
+
+        // Matikan constraint untuk truncate
+        Schema::disableForeignKeyConstraints();
+        User::truncate();
+        Schema::enableForeignKeyConstraints();
+
+        // Buat data user baru
         User::create([
-            'name' => 'Admin LDK',
-            'nim' => '101010',
-            'email' => 'admin@ldk.com',
-            'password' => Hash::make('password'),
-            'role' => 'admin',
-            'divisi_id' => null,
+            'name' => 'Admin LDK', 'nim' => '101010', 'email' => 'admin@ldk.com',
+            'password' => Hash::make('password'), 'role' => 'admin', 'divisi_id' => null,
         ]);
-
-        // Buat Ketua (role: ketua)
         User::create([
-            'name' => 'Ketua Umum',
-            'nim' => '111111',
-            'email' => 'ketua@ldk.com',
-            'password' => Hash::make('password'),
-            'role' => 'ketua',
-            'divisi_id' => null,
+            'name' => 'Ketua LDK', 'nim' => '111111', 'email' => 'ketua@ldk.com',
+            'password' => Hash::make('password'), 'role' => 'ketua', 'divisi_id' => null,
         ]);
-
-        // Buat Pengurus (role: pengurus)
         User::create([
-            'name' => 'Pengurus Syiar',
-            'nim' => '333333',
-            'email' => 'pengurus.syiar@ldk.com',
-            'password' => Hash::make('password'),
-            'role' => 'pengurus',
-            'divisi_id' => $divisiSyiar->id,
+            'name' => 'Pengurus Syiar', 'nim' => '333333', 'email' => 'pengurus.syiar@ldk.com',
+            'password' => Hash::make('password'), 'role' => 'pengurus', 'divisi_id' => $divisiSyiar->id,
         ]);
-
-        // Buat Anggota (role: anggota)
         User::create([
-            'name' => 'Anggota Kaderisasi 1',
-            'nim' => '444444',
-            'email' => 'anggota.kaderisasi1@ldk.com',
-            'password' => Hash::make('password'),
-            'role' => 'anggota',
-            'divisi_id' => $divisiKaderisasi->id,
+            'name' => 'Anggota BPSDM', 'nim' => '444444', 'email' => 'anggota.bpsdm@ldk.com',
+            'password' => Hash::make('password'), 'role' => 'anggota', 'divisi_id' => $divisiBpsdm->id,
         ]);
     }
 }
