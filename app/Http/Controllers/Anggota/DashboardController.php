@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Anggota;
 
 use App\Http\Controllers\Controller;
+use App\Models\Kegiatan; // <-- [MODIFIKASI KITA #1] Panggil model Kegiatan
 use Illuminate\Http\Request;
 
 class DashboardController extends Controller
@@ -14,8 +15,11 @@ class DashboardController extends Controller
      */
     public function index()
     {
-        // Perintah ini berarti: "Tolong tampilkan file view yang ada di
-        // resources/views/anggota/dashboard.blade.php"
-        return view('anggota.dashboard');
+        // [MODIFIKASI KITA #2]
+        // Ambil semua data kegiatan, urutkan berdasarkan tanggal terbaru
+        $kegiatans = Kegiatan::orderBy('tanggal_kegiatan', 'desc')->get();
+
+        // Kirim data kegiatans ke halaman view dashboard anggota
+        return view('anggota.dashboard', compact('kegiatans'));
     }
 }

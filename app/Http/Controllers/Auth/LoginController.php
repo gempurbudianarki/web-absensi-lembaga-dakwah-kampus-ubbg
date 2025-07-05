@@ -3,8 +3,8 @@
 namespace App\Http\Controllers\Auth;
 
 use App\Http\Controllers\Controller;
-use Illuminate\Http\Request; // <-- Butuh ini
-use Illuminate\Support\Facades\Auth; // <-- Butuh ini
+use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 
 class LoginController extends Controller
 {
@@ -17,26 +17,20 @@ class LoginController extends Controller
     }
 
     /**
-     * [MESIN BARU KITA]
      * Meng-handle proses login secara manual.
      */
     public function login(Request $request)
     {
-        // 1. Validasi input dari form
         $credentials = $request->validate([
             'email' => ['required', 'email'],
             'password' => ['required'],
         ]);
 
-        // 2. Coba untuk login
         if (Auth::attempt($credentials)) {
-            // Jika berhasil login...
             $request->session()->regenerate();
 
-            // 3. Ambil role user
             $user = Auth::user();
 
-            // 4. Redirect paksa berdasarkan role
             switch ($user->role) {
                 case 'admin':
                     return redirect()->intended('/admin/dashboard');
@@ -47,26 +41,32 @@ class LoginController extends Controller
                 case 'anggota':
                     return redirect()->intended('/anggota/dashboard');
                 default:
-                    // Jika role aneh, logout dan kembali ke login
                     Auth::logout();
                     return redirect('/login')->withErrors(['email' => 'Role tidak valid.']);
             }
         }
 
-        // 5. Jika email atau password salah
         return back()->withErrors([
             'email' => 'Email atau Password yang Anda masukkan salah.',
         ])->onlyInput('email');
     }
 
     /**
-     * Meng-handle proses logout.
+     * [MODIFIKASI KITA]
+     * Meng-handle proses logout dan mengarahkan ke halaman login.
      */
     public function logout(Request $request)
     {
+        // Lakukan proses logout standar
         Auth::logout();
+
+        // Hancurkan session lama
         $request->session()->invalidate();
+
+        // Buat ulang token keamanan
         $request->session()->regenerateToken();
-        return redirect('/');
+
+        // Arahkan kembali ke halaman login
+        return redirect('/login');
     }
 }

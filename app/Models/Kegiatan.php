@@ -15,10 +15,11 @@ class Kegiatan extends Model
      *
      * @var array<int, string>
      */
-    // [MODIFIKASI KITA #1] Daftar izin kolom yang boleh diisi
+    // [MODIFIKASI KITA] Menambahkan 'poster' ke dalam daftar izin
     protected $fillable = [
         'nama_kegiatan',
         'deskripsi',
+        'poster', // <-- INI YANG TERLEWAT
         'tanggal_kegiatan',
         'waktu_mulai_absen',
         'waktu_selesai_absen',
@@ -30,7 +31,6 @@ class Kegiatan extends Model
      *
      * @var array<string, string>
      */
-    // [MODIFIKASI KITA #2] Mengubah tipe data kolom agar lebih pintar
     protected $casts = [
         'tanggal_kegiatan' => 'date',
         'waktu_mulai_absen' => 'datetime',
@@ -38,7 +38,6 @@ class Kegiatan extends Model
     ];
 
 
-    // [MODIFIKASI KITA #3] Relasi ke Absensi
     /**
      * Mendefinisikan relasi bahwa satu Kegiatan bisa memiliki banyak data Absensi.
      */

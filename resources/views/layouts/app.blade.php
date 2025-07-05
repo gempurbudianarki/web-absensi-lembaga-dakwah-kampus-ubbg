@@ -15,6 +15,9 @@
 
     <!-- Scripts -->
     @vite(['resources/sass/app.scss', 'resources/js/app.js'])
+
+    {{-- [MODIFIKASI KITA] Menambahkan 'colokan' untuk menerima style kustom --}}
+    @stack('styles')
 </head>
 <body>
     <div id="app">
@@ -72,7 +75,8 @@
             </div>
         </nav>
 
-        <main class="py-4">
+        <main>
+            {{-- [MODIFIKASI KITA] Menghapus class py-4 agar konten bisa full-width --}}
             @yield('content')
         </main>
     </div>

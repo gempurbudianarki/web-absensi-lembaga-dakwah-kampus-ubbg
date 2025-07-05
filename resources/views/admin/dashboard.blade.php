@@ -1,37 +1,19 @@
-{{-- Kita memberitahu file ini untuk menggunakan template utama dari layouts/app.blade.php --}}
-@extends('layouts.app')
+{{-- [MODIFIKASI KITA] Menggunakan layout admin yang baru dengan sidebar --}}
+@extends('layouts.admin')
 
-{{-- Ini adalah bagian konten utama dari halaman --}}
+{{-- Bagian ini akan disuntikkan ke dalam @yield('content') di layout admin --}}
 @section('content')
-<div class="container">
-    <div class="row justify-content-center">
-        <div class="col-md-8">
-            <div class="card">
-                <div class="card-header">
-                    {{-- Judul Halaman --}}
-                    <strong>Dashboard Admin</strong>
-                </div>
+    <h1 class="mt-4">Dashboard</h1>
+    <p>Selamat datang di Panel Kontrol Admin LDK Absensi.</p>
 
-                <div class="card-body">
-                    @if (session('status'))
-                        <div class="alert alert-success" role="alert">
-                            {{ session('status') }}
-                        </div>
-                    @endif
-
-                    {{-- Pesan Selamat Datang --}}
-                    <p>Selamat datang, <strong>{{ Auth::user()->name }}</strong>!</p>
-                    <p>Anda telah berhasil login sebagai seorang <strong>Admin</strong>.</p>
-                    <hr>
-                    <p>Dari halaman ini, Anda akan bisa mengelola seluruh data aplikasi, termasuk:</p>
-                    <ul>
-                        <li>Manajemen Pengguna (Admin, Pengurus, Anggota)</li>
-                        <li>Manajemen Kegiatan dan Jadwal Absensi</li>
-                        <li>Melihat Laporan Kehadiran Lengkap</li>
-                    </ul>
-                </div>
-            </div>
+    <div class="card">
+        <div class="card-header">
+            <strong>Status Aplikasi</strong>
+        </div>
+        <div class="card-body">
+            <p>Selamat datang, <strong>{{ Auth::user()->name }}</strong>!</p>
+            <p>Anda telah berhasil login sebagai seorang <strong>Admin</strong>.</p>
+            <p>Gunakan menu navigasi di sebelah kiri untuk mengelola aplikasi.</p>
         </div>
     </div>
-</div>
 @endsection
