@@ -14,6 +14,8 @@ use Illuminate\Support\Facades\Route;
 |
 */
 
+// Rute ini adalah bawaan Laravel Sanctum. Kita biarkan saja untuk
+// kemungkinan pengembangan di masa depan (misalnya jika ada aplikasi mobile).
 Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
     return $request->user();
 });

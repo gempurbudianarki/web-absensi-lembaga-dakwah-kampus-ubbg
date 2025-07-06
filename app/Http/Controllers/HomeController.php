@@ -18,23 +18,37 @@ class HomeController extends Controller
     }
 
     /**
-     * Show the application dashboard.
+     * Memeriksa peran pengguna dan mengarahkannya ke dashboard yang sesuai.
+     * Ini adalah pusat pengalihan (dispatcher) setelah login.
      *
-     * @return \Illuminate\Contracts\Support\Renderable
+     * @return \Illuminate\Http\RedirectResponse
      */
     public function index()
     {
-        // Ambil pengguna yang sedang login
         $user = Auth::user();
 
-        // Cek peran pengguna
-        if ($user->role == 'admin') {
-            // Jika admin, arahkan ke dashboard admin
-            return redirect()->route('admin.dashboard');
+        // Cek jika user punya peran
+        if (empty($user->role)) {
+             Auth::logout();
+             return redirect('/login')->with('error', 'Peran Anda tidak terdefinisi. Hubungi Admin.');
         }
 
-        // Untuk SEMUA peran lainnya (ketua, pengurus, anggota, dll)
-        // Arahkan ke dashboard portal pengguna yang baru
-        return redirect()->route('user.dashboard');
+        // Arahkan berdasarkan peran
+        switch ($user->role) {
+            case 'admin':
+                return redirect()->route('admin.dashboard');
+
+            case 'ketua':
+            case 'wakil ketua':
+            case 'sekretaris':
+            case 'bendahara':
+            case 'pengurus':
+            case 'anggota':
+                return redirect()->route('anggota.dashboard');
+
+            default:
+                Auth::logout();
+                return redirect('/login')->with('error', 'Peran tidak dikenali.');
+        }
     }
 }

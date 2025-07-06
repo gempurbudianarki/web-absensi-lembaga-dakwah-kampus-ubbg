@@ -4,5 +4,24 @@
 // Variables
 @import 'variables';
 
-// Bootstrap
+// Bootstrap 5
 @import 'bootstrap/scss/bootstrap';
+
+// Font Awesome
+@import "@fortawesome/fontawesome-free/scss/fontawesome";
+@import "@fortawesome/fontawesome-free/scss/regular";
+@import "@fortawesome/fontawesome-free/scss/solid";
+@import "@fortawesome/fontawesome-free/scss/brands";
+
+// Kustomisasi CSS kita sendiri bisa ditambahkan di bawah ini
+body {
+    background-color: #f8f9fa; // Warna latar belakang abu-abu muda
+}
+
+#wrapper {
+    display: flex;
+    width: 100%;
+    align-items: stretch;
+}
+
+// Styling untuk Sidebar akan kita tambahkan nanti
